@@ -1,0 +1,113 @@
+<?php
+include_once("header.php");
+?>
+
+
+<style>
+    table {
+
+        border-collapse: collapse;
+        width: 500px;
+        border-style: solid;
+        border-width: thin;
+        border: solid black;
+    }
+
+    td {
+        padding: 10px;
+        color: #636363;
+        border: 1px solid #dddfe1;
+    }
+
+    th,
+    td {
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f2f2
+    }
+
+    th {
+
+        background-color: #54585d;
+        border: 1px solid #54585d;
+        color: white;
+        font-weight: bold;
+        border-bottom: solid black;
+    }
+
+    th:hover {
+        background-color: #64686e;
+
+    }
+</style>
+
+<div class="col-12">
+    <h3 class="page-title">Appointment</h3><br>
+    <div class="card-body" style="text-align:right;"></div>
+    <div class="card">
+
+        <?php
+
+        $did = $_SESSION["did"];
+        $cnn = mysqli_connect("localhost", "root", "", "pet");
+        $query = "Select user.uid,user.fname,user.lname,breed.bname,breed.bid,appointment.adatetime,appointment.status,appointment.uid,appointment.aid,appointment.did,doctor.did,DATEDIFF(now(),adatetime) as dt from user,breed,appointment,doctor where user.uid=appointment.uid AND breed.bid=appointment.bid AND doctor.did=appointment.did AND doctor.did=$did";
+
+        $result = $cnn->query($query);
+        $cnt = 0;
+        $str = "<table class='table'><tr class='card-title m-b-0'><th>Sr No.</th><th>Owner name</th><th>Breed name</th><th>Date and time</th><th></th><th></th></tr>";
+        while ($row = $result->fetch_assoc()) {
+            $cnt++;
+            $str .= "<tr><td>" . "$cnt</td><td>" . $row["fname"] . " " . $row["lname"] . "</td><td>" . $row["bname"] . "</td><td>" . $row["adatetime"] . "</td>";
+            if ($row["status"] == 1) {
+                $str .= "<td style='font-weight:bold;'>Done</td><td></td>";
+            } else if ($row["status"] == 2) {
+                $str .= "<td><small>Rejected</small></td><td></td>";
+            } else if ($row["status"] == 0) {
+                $str .= "<a href='vappointsure.php?id=" . $row["aid"] . "'><td style='color:red;'>Pending</td></a>";
+                if ($row["dt"] >= 7) {
+                    $str .= "<td>" . $row["dt"] . "days</td>";
+                    if ($row["dt"] >= 18) {
+                        $aid = $row["aid"];
+                        // $cnn=mysqli_connect("localhost","root","","pet");
+        ?>
+                        <script src="jquery-3.4.1.min.js"></script>
+                        <script>
+                            $(document).ready(function() {
+                                <?php
+                                $quy = "Update appointment set status=2 where aid=$aid";
+                                // $quy="select aid from appointment where aid=$aid;";
+                                $result = $cnn->query($quy);
+                                // echo $row["aid"];
+                                echo $quy;
+
+                                $str .= "<td>" . $row["aid"] . "</td>";
+                                ?>
+                            });
+                            <?php
+
+                        }
+                    } else {
+                        $str .= "<td></td>";
+                    }
+                } else {
+                    echo "sorry no any appointment here!!!";
+                }
+            }
+            // echo "<script>
+            //             alert('hii')
+            //             </script>";
+
+            $str .= "</tr></table>";
+
+            echo $str;
+                            ?>
+
+                                <
+                                /div> <
+                                /div>
+                            <?php
+                            include_once("footer.php");
+                            ?>
